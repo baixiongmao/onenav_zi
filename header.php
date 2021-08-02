@@ -1,9 +1,14 @@
 <?php
-/*!
- * Theme Name:One Nav
- * Theme URI:https://www.iotheme.cn/
- * Author:iowen
- * Author URI:https://www.iowen.cn/
+/*
+ * @Theme Name:One Nav
+ * @Theme URI:https://www.iotheme.cn/
+ * @Author: iowen
+ * @Author URI: https://www.iowen.cn/
+ * @Date: 2021-06-03 08:55:58
+ * @LastEditors: iowen
+ * @LastEditTime: 2021-07-15 23:36:53
+ * @FilePath: \onenav\header.php
+ * @Description: 
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
 <!DOCTYPE html>
@@ -13,8 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
 <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <?php get_template_part( 'templates/title' ) ?>
-<link rel="shortcut icon" href="<?php echo io_get_option('favicon')['url'] ?>">
-<link rel="apple-touch-icon" href="<?php echo io_get_option('apple_icon')['url'] ?>">
+<link rel="shortcut icon" href="<?php echo io_get_option('favicon') ?>">
+<link rel="apple-touch-icon" href="<?php echo io_get_option('apple_icon') ?>">
 <?php wp_head(); ?>
 <?php custom_color() ?>
 <?php echo io_get_option('ad_t'); ?>
@@ -27,14 +32,10 @@ if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
 <?php else: ?>
 <body <?php body_class(theme_mode()); ?> >
 <?php endif; ?>
-<!-- 头部自定义代码 -->
-
-<?php if( io_get_option('nav_login') ){
-    global $user_ID; 
-    if(!$user_ID) {?>
-    echo"<?php echo io_get_option('header_html');?>"
-<?php endif; ?>
-<?php echo io_get_option('header_html');?>
-<!-- end 头部自定义代码 -->
 <?php if(io_get_option('loading_fx')) { ?><div id="loading"><?=loading_type()?></div><?php } ?>
+<?php if(io_get_option('nav_login') ){ global $user_ID; 
+                            if(!$user_ID) {?><?php echo io_get_option('header_html');?>
+                        <?php }else{
+                                 }
+                        } ?>
    <div class="page-container">

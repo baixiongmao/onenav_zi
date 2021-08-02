@@ -7,6 +7,7 @@ CSF::createOptions( $prefix, array(
     'menu_title'      => __('主题设置','csf'),
     'menu_slug'       => 'theme_settings',
     'menu_position'   => 59,
+    'save_defaults'   => true,
     'ajax_save'       => false,
     'show_bar_menu'   => false,
     'theme'           => 'dark',
@@ -43,32 +44,7 @@ if(!function_exists('get_all_taxonomy')){
         return $customize;
     }
 }
-// 获取热搜列表
-if(!function_exists('get_all_topsearch')){
-	function get_all_topsearch(){  
-        //if( ! is_admin() ) { return; }
-        $topsearch = array(
-            'baidu_topsearch'           => '百度热点',
-            'weibo_topsearch'           => '微博热搜',
-            'zhihu_topsearch'           => '知乎排行榜',
-            'weread_topsearch'          => '微信读书',
-            'sspai_topsearch'           => '少数派',
-            '52pojie_topsearch'         => '吾爱破解',
-            '36kr_topsearch'            => '36氪',
-            'bilibili_topsearch'        => '哔哩哔哩',
-            'lssdjt_topsearch'          => '历史上的今天',
-            'douban_topsearch'          => '豆瓣小组',
-            'smzdm_select'              => '什么值得买',
-            'weixin_news'               => '微信热榜',
-            'weixin_hotword'            => '微信热搜词',
-            'weixin_amusing'            => '微信搞笑',
-            'weixin_gossip'             => '微信八卦精',
-            'weixin_financial'          => '微信财经迷',
-            'dsb_news'                  => '电商报',
-        );
-        return $topsearch;
-    }
-}
+$views_use_ajax = ( defined( 'WP_CACHE' ) && WP_CACHE )?'':'csf-depend-visible csf-depend-on';
 
 // 获取效果列表
 if(!function_exists('get_all_fx_bg')){
@@ -80,6 +56,7 @@ if(!function_exists('get_all_fx_bg')){
             else
                 $fxbg[sprintf("%02d", $i)] = $i;
         }
+        $fxbg['custom'] = '自定义';
         return $fxbg;
     }
 }
@@ -102,23 +79,19 @@ CSF::createSection( $prefix, array(
             'after'   => '<br>'.__('请先使用订单激活码<a href="//www.iotheme.cn/user?try=reg" target="_blank" title="注册域名">注册域名</a>。 如果没有购买，请访问<a href="//www.iotheme.cn/store/onenav.html" target="_blank" title="购买主题">iTheme</a>购买。','io_setting'),
         ),
         array(
-            'id'      => 'iowen_key',
-            'type'    => 'text',
-            'title'   => __('一为 API 在线服务激活码','io_setting'),
-            'after'   => '<br>'.__('留空不影响主题使用，如需要以下服务必须填。<br>此 key 用于<br>1、添加网址时自动获取网址标题、关键字等信息<br>2、热搜榜、新闻源等卡片数据获取<br>','io_setting').'<br>iowen 在线服务为订阅服务，购买主题免费赠送一年，请先使用订单激活码<a href="//www.iotheme.cn/user?try=reg" target="_blank" title="注册域名">注册域名</a>。 如果没有购买或者过期，请访问<a href="//www.iotheme.cn/store/iowenapi.html" target="_blank" title="购买服务">iTheme</a>购买。',
-        ),
-        array(
             'id'      => 'update_theme',
             'type'    => 'switcher',
             'title'   => __('检测主题更新','io_setting'),
+            'label'   => __('在线更新为替换更新，如果你修改了主题代码，请关闭（如需修改，可以使用子主题）','io_setting'),
             'default' => true,
         ),
         array(
             'id'      => 'update_beta',
             'type'    => 'switcher',
-            'title'   => __('体验Beta版','io_setting'),
+            'title'   => ' ┗━━ '.__('检测Beta版更新','io_setting'),
             'label'   => __('Beta版及测试版，可体验最新功能，同时也会各种bug。','io_setting'),
             'default' => false,
+            'dependency' => array( 'update_theme', '==', true )
         ),
         array(
             'type'    => 'notice',
@@ -169,75 +142,57 @@ CSF::createSection( $prefix, array(
 // 图标设置
 //
 CSF::createSection( $prefix, array(
-  'title'        => __('图标设置','io_setting'),
-  'icon'         => 'fa fa-star',
-  'description'  => __('网站LOGO和Favicon设置','io_setting'),
-  'fields'       => array(
+    'title'        => __('图标设置','io_setting'),
+    'icon'         => 'fa fa-star',
+    'description'  => __('网站LOGO和Favicon设置','io_setting'),
+    'fields'       => array(
     array(
         'id'        => 'logo_normal',
-        'type'      => 'media',
-        'title'     => 'Logo',
+        'type'      => 'upload',
+        'title'     => '暗色主题Logo',
         'add_title' => __('上传','io_setting'),
         'after'     => '<p class="cs-text-muted">'.__('建议高80px，长小于360px','io_setting'),
-        'default'   => array(
-            'url'       => get_theme_file_uri( '/images/logo@2x.png'),
-            'thumbnail' => get_theme_file_uri( '/images/logo@2x.png'),
-        ),
+        'default'   => get_theme_file_uri( '/images/logo@2x.png'),
     ),
     array(
         'id'        => 'logo_normal_light',
-        'type'      => 'media',
+        'type'      => 'upload',
         'title'     => __('亮色主题Logo','io_setting'),
         'add_title' => __('上传','io_setting'),
         'after'     => '<p class="cs-text-muted">'.__('建议高80px，长小于360px','io_setting'),
-        'default'   => array(
-            'url'       => get_theme_file_uri('/images/logo_l@2x.png'),
-            'thumbnail' => get_theme_file_uri('/images/logo_l@2x.png'),
-        ),
+        'default'   => get_theme_file_uri('/images/logo_l@2x.png'),
     ),
     array(
         'id'        => 'logo_small',
-        'type'      => 'media',
-        'title'     => __('方形 Logo','io_setting'),
+        'type'      => 'upload',
+        'title'     => __('暗色主题方形 Logo','io_setting'),
         'add_title' => __('上传','io_setting'),
         'after'     => '<p class="cs-text-muted">'.__('建议 80x80','io_setting'),
-        'default'   => array(
-            'url'       => get_theme_file_uri('/images/logo-collapsed@2x.png'),
-            'thumbnail' => get_theme_file_uri('/images/logo-collapsed@2x.png'),
-        ),
+        'default'   => get_theme_file_uri('/images/logo-collapsed@2x.png'),
     ),
     array(
         'id'        => 'logo_small_light',
-        'type'      => 'media',
+        'type'      => 'upload',
         'title'     => __('亮色主题方形 Logo','io_setting'),
         'add_title' => __('上传','io_setting'),
         'after'     => '<p class="cs-text-muted">'.__('建议 80x80','io_setting'),
-        'default'   => array(
-            'url'       => get_theme_file_uri('/images/logo-dark_collapsed@2x.png'),
-            'thumbnail' => get_theme_file_uri('/images/logo-dark_collapsed@2x.png'),
-        ),
+        'default'   => get_theme_file_uri('/images/logo-dark_collapsed@2x.png'),
     ),
     array(
         'id'        => 'favicon',
-        'type'      => 'media',
+        'type'      => 'upload',
         'title'     => __('上传 Favicon','io_setting'),
         'add_title' => __('上传','io_setting'),
-        'default'   => array(
-            'url'       => get_theme_file_uri('/images/favicon.png'),
-            'thumbnail' => get_theme_file_uri('/images/favicon.png'),
-        ),
+        'default'   => get_theme_file_uri('/images/favicon.png'),
     ),
     array(
         'id'        => 'apple_icon',
-        'type'      => 'media',
+        'type'      => 'upload',
         'title'     => __('上传 apple_icon','io_setting'),
         'add_title' => __('上传','io_setting'),
-        'default'   => array(
-            'url'       => get_theme_file_uri('/images/app-ico.png'),
-            'thumbnail' => get_theme_file_uri('/images/app-ico.png'),
-        ),
+        'default'   => get_theme_file_uri('/images/app-ico.png'),
     ),
-  )
+    )
 ));
 
 //
@@ -265,13 +220,13 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('自定义首页内容宽度','io_setting'),
             'default' => false,
-            'class'   => 'new',
+            'class'   => '',
         ),
         array(
             'id'      => 'h_width',
             'type'    => 'slider',
             'title'   => ' ┗━━ '.'宽度',
-            'class'   => 'new',
+            'class'   => '',
             'min'     => 1320,
             'max'     => 2000,
             'step'    => 10,
@@ -305,19 +260,16 @@ CSF::createSection( $prefix, array(
         ),
         array(
             'id'        => 'login_ico',
-            'type'      => 'media',
+            'type'      => 'upload',
             'title'     => __('登录页图片','io_setting'),
             'add_title' => __('上传','io_setting'),
-            'default'   => array(
-                'url'       => get_theme_file_uri('/images/login.jpg'),
-                'thumbnail' => get_theme_file_uri('/images/login.jpg'),
-            ),
+            'default'   => get_theme_file_uri('/images/login.jpg'),
         ),
         array(
             'id'        => 'login_color',
             'type'      => 'color_group',
             'title'     => '登录页背景色',
-            'class'     => 'new',
+            'class'     => '',
             'options'   => array(
                 'color-l'   => '左边',
                 'color-r'   => '右边',
@@ -338,16 +290,16 @@ CSF::createSection( $prefix, array(
             'type'      => 'color_group',
             'title'     => '按钮颜色',
             'options'   => array(
-              'color'   => '默认颜色',
-              'color-t' => '默认文字颜色',
-              'hover'   => 'hover 颜色',
-              'hover-t' => 'hover 文字颜色',
+                'color'   => '默认颜色',
+                'color-t' => '默认文字颜色',
+                'hover'   => 'hover 颜色',
+                'hover-t' => 'hover 文字颜色',
             ),
             'default'   => array(
-              'color'   => '#f1404b',
-              'color-t' => '#ffffff',
-              'hover'   => '#14171B',
-              'hover-t' => '#ffffff',
+                'color'   => '#f1404b',
+                'color-t' => '#ffffff',
+                'hover'   => '#14171B',
+                'hover-t' => '#ffffff',
             ),
             'dependency' => array( 'custom_color', '==', true )
         ),
@@ -356,8 +308,8 @@ CSF::createSection( $prefix, array(
             'type'    => 'link_color',
             'title'   => '文章 a 链接颜色',
             'default' => array(
-              'color' => '#f1404b',
-              'hover' => '#f9275f',
+                'color' => '#f1404b',
+                'hover' => '#f9275f',
             ),
             'dependency' => array( 'custom_color', '==', true )
         ),
@@ -376,9 +328,8 @@ CSF::createSection( $prefix, array(
             'dependency' => array( 'custom_color', '==', true )
         ),
     )
-  ));
-  
-  
+));
+
 //
 // 基础设置
 //
@@ -386,6 +337,15 @@ CSF::createSection( $prefix, array(
     'title'  => __('基础设置','io_setting'),
     'icon'   => 'fa fa-th-large',
     'fields' => array(
+        array(
+            'id'      => 'nav_comment',
+            'type'    => 'switcher',
+            'title'   => __('站点评论','io_setting'),
+            'text_on' => '启用',
+            'text_off'=> '禁用',
+            'text_width' => 80,
+            'default' => true,
+        ),
         array(
             'id'      => 'min_nav',
             'type'    => 'switcher',
@@ -402,11 +362,26 @@ CSF::createSection( $prefix, array(
             'class'   => '',
         ),
         array(
+            'id'          => 'cdn_resources',
+            'type'        => 'select',
+            'title'       => '静态文件使用公共库',
+            'chosen'      => true,
+            'options'     => array(
+                'local'         => '本地',
+                'jsdelivr'      => 'jsdelivr.net',
+                //'staticfile'    => 'staticfile.org',
+            ),
+            'class'   => 'new',
+            'settings' => array(
+                'width'   => '120px',
+            ),
+            'default'     => 'local'
+        ),
+        array(
             'id'      => 'bing_cache',
             'type'    => 'switcher',
             'title'   => __('必应背景图片本地缓存','io_setting'),
             'label'   => __('文明获取，避免每次都访问 bing 服务器','io_setting'),
-            'class'   => 'new',
             'default' => true,
         ),
         array(
@@ -424,7 +399,7 @@ CSF::createSection( $prefix, array(
             'title'   => __('启用用户中心','io_setting'),
             'label'   => __('同时启用个性化登录页','io_setting'),
             'class'   => '',
-            'default' => true,
+            'default' => false,
         ),
         array(
             'type'    => 'submessage',
@@ -555,37 +530,6 @@ CSF::createSection( $prefix, array(
             'default' => true,
         ),
         array(
-            'id'      => 'post_views',
-            'type'    => 'switcher',
-            'title'   => __('访问统计','io_setting'),
-            'label'   => __('启用前先禁用WP-PostViews插件，因为主题已经集成WP-PostViews插件,或者关掉选项安装WP-PostViews插件','io_setting'),
-            'after'   =>  '<br><br>如果开启没显示数字，去后台 <a href="'.home_url().'/wp-admin/options-general.php?page=views_options" >“设置 > 浏览计数”</a> 选项里 “恢复默认” 并保存', 
-            'default' => false,
-        ),
-        array(
-            'id'      => 'views_n',
-            'type'    => 'text',
-            'title'   => ' ┗━━ '.__('访问基数','io_setting'),
-            'after'   => '<br>'.__('随机访问基数，取值范围：(0~10)*访问基数<br>设置大于0的整数启用，会导致访问统计虚假，酌情开启，关闭请填0','io_setting'),
-            'default' => 0,
-            'dependency' => array( 'post_views', '==', true )
-        ),
-        array(
-            'id'      => 'views_r',
-            'type'    => 'text',
-            'title'   => ' ┗━━ '.__('访问随机计数','io_setting'),
-            'after'   => '<br>'.__('访问一次随机增加访问次数，比如访问一次，增加5次<br>取值范围：(1~10)*访问随机数<br>设置大于0的数字启用，可以是小数，如：0.5，但小于0.5会导致取0值<br>会导致访问统计虚假，酌情开启，关闭请填0','io_setting'),
-            'default' => 0,
-            'dependency' => array( 'post_views', '==', true )
-        ),
-        array(
-            'id'      => 'like_n',
-            'type'    => 'text',
-            'title'   => __('点赞基数','io_setting'),
-            'after'   => '<br>'.__('随机点赞基数，取值范围：(0~10)*点赞基数<br>设置大于0的整数启用，会导致点赞统计虚假，酌情开启，关闭请填0','io_setting'),
-            'default' => 0,
-        ),
-        array(
             'id'      => 'is_go',
             'type'    => 'switcher',
             'title'   => __('内链跳转(go跳转)','io_setting'),
@@ -600,19 +544,58 @@ CSF::createSection( $prefix, array(
             'after'   => __('一行一个地址，注意不要有空格。<br>需要包含http(s)://<br>iowen.cn和www.iowen.cn为不同的网址<br>此设置同时用于 nofollow 的排除。','io_setting'),
         ),
         array(
+            'id'      => 'lazyload',
+            'type'    => 'switcher',
+            'title'   => __('图标懒加载','io_setting'),
+            'label'   => __('所有图片懒加载','io_setting'),
+            'default' => true,
+        ),
+        array(
+            'id'      => 'show_friendlink',
+            'type'    => 'switcher',
+            'title'   => __('启用友链','io_setting'),
+            'label'   => __('启用自定义文章类型“链接(友情链接)”，启用后需刷新页面','io_setting'),
+            'default' => true,
+        ),
+        array(
+            'id'         => 'links',
+            'type'       => 'switcher',
+            'title'      => ' ┗━━ '.__('友情链接','io_setting'),
+            'label'      => __('在首页底部添加友情链接','io_setting'),
+            'default'    => true,
+            'dependency' => array( 'show_friendlink', '==', true )
+        ),
+        array(
+            'id'          => 'home_links',
+            'type'        => 'checkbox',
+            'title'       => ' ┗━━ '.__('首页显示分类','io_setting'),
+            'after'       => __('不选则全部显示。','io_setting'),
+            'inline'      => true,
+            'options'     => 'categories',
+            'query_args'  => array(
+                'taxonomy'  => 'link_category',
+            ),
+            'dependency'  => array( 'show_friendlink|links', '==|==', 'true|true' )
+        ),
+        array(
+            'id'          => 'links_pages',
+            'type'        => 'select',
+            'title'       => ' ┗━━ '.__('友情链接归档页','io_setting'),
+            'after'       => __(' 如果没有，新建页面，选择“友情链接”模板并保存。','io_setting'),
+            'options'     => 'pages',
+            'query_args'  => array(
+                'posts_per_page'  => -1,
+            ),
+            'placeholder' => __('选择友情链接归档页面', 'io_setting'),
+            'dependency'  => array( 'show_friendlink|links', '==|==', 'true|true' )
+        ),
+        array(
             'id'      => 'save_image',
             'type'    => 'switcher',
             'title'   => __('本地化外链图片','io_setting'),
             'label'   => __('自动存储外链图片到本地服务器','io_setting'),
             'after'   => __('只支持经典编辑器<br><strong>注：</strong>使用古腾堡(区块)编辑器的请不要开启，否则无法保存文章','io_setting'),
             'default' => false,
-        ),
-        array(
-            'id'      => 'lazyload',
-            'type'    => 'switcher',
-            'title'   => __('图标懒加载','io_setting'),
-            'label'   => __('所有图片懒加载','io_setting'),
-            'default' => true,
         ),
     )
 ));
@@ -699,6 +682,15 @@ CSF::createSection( $prefix, array(
                 'category'    => 16,
             ),
             'after'      => '填写需要显示的数量。<br>-1 为显示分类下所有网址<br>&nbsp;0 为根据<a href="'.home_url().'/wp-admin/options-reading.php">系统设置数量显示</a>',
+        ),
+        array(
+            'id'        => 'second_count',
+            'type'      => 'switcher',
+            'title'     => __('次级导航页显示数量','io_setting'),
+            'text_on' => '全部显示',
+            'text_off'=> '继承上方设置项',
+            'text_width' => 120,
+            'class'     => 'new',
         ),
         array(
             'id'      => 'show_sticky',
@@ -859,7 +851,7 @@ CSF::createSection( $prefix, array(
                     'id'         => 'big_title',
                     'type'       => 'text',
                     'title'      => __('大字标题','io_setting'),
-                    'after'      => '<br>'.__('留空不显示','io_setting'), 
+                    'after'      => __('留空不显示','io_setting'), 
                     'class'   => '', 
                     'dependency' => array( 'search_big', '==', true )
                 ),
@@ -896,7 +888,7 @@ CSF::createSection( $prefix, array(
                 ),
                 array(
                     'id'        => 'search_img',
-                    'type'      => 'media',
+                    'type'      => 'upload',
                     'title'     => '背景图片',
                     'add_title' => __('上传','io_setting'),
                     'dependency' => array( 'search_big|big_skin', '==|==', 'true|css-img' )
@@ -909,6 +901,18 @@ CSF::createSection( $prefix, array(
                     'inline'  => true,
                     'options' => get_all_fx_bg(),
                     'dependency' => array( 'search_big|big_skin', '==|==', 'true|canvas-fx' )
+                ),
+                array(
+                    'id'         => 'custom_canvas',
+                    'type'       => 'text',
+                    'title'      => __('canvas地址','io_setting'),
+                    'after'      => __('留空会爆炸，既然选择了，请不要留空！！！<br>示例：//owen0o0.github.io/ioStaticResources/canvas/01.html<br>注意：可能会有跨域问题，解决方法百度。','io_setting'), 
+                    'class'      => 'new', 
+                    'default'    => '//owen0o0.github.io/ioStaticResources/canvas/01.html',
+                    'attributes' => array(
+                        'style'    => 'width: 100%'
+                    ),
+                    'dependency' => array( 'canvas_id', '==', 'custom' )
                 ),
                 array(
                     'id'         => 'bg_gradual',
@@ -926,38 +930,6 @@ CSF::createSection( $prefix, array(
                 ),
             ),
             'dependency' => array( 'search_position', 'any', 'home' )
-        ),
-        array(
-            'id'             => 'hot_list_id2',
-            'type'           => 'sorter',
-            'title'          => __('热搜热点小工具','io_setting'),
-            'class'          => 'topsearch',
-            //'default'        => array( 
-            //    'disabled'     => array(
-            //        'baidu_topsearch'       => '百度热点',
-            //        'weibo_topsearch'       => '微博热搜',
-            //        'zhihu_topsearch'       => '知乎排行榜',
-            //        'weread_topsearch'      => '微信读书',
-            //        'sspai_topsearch'       => '少数派',
-            //        '52pojie_topsearch'     => '吾爱破解',
-            //        '36kr_topsearch'        => '36氪',
-            //        'bilibili_topsearch'    => '哔哩哔哩',
-            //        'lssdjt_topsearch'      => '历史上的今天',
-            //        'douban_topsearch'      => '豆瓣小组',
-            //        'smzdm_select'          => '什么值得买',
-            //        'weixin_news_topsearch' => '微信热榜',
-            //    ),
-            //),
-            'enabled_title'  => __('启用','io_setting'),
-            'disabled_title' => __('隐藏', 'io_setting'),
-            'before'         => __('需到开始使用中填写key（--->拖动<---），最多显示5个','io_setting').'<br>',
-        ),
-        array(
-            'id'         => 'hot_iframe',
-            'type'       => 'switcher',
-            'title'      => __('热搜热点站内 iframe 加载','io_setting'),
-            'label'      => __('如果开启了此选项链接还是在新窗口打开，说明对方不支持 iframe 嵌套','io_setting'),
-            'default'    => false,
         ),
         array(
             'id'         => 'customize_card',
@@ -987,7 +959,7 @@ CSF::createSection( $prefix, array(
             'after'      => '<br>'.__('最多显示多少用户自定义网址分类，0 为全部显示','io_setting'), 
             'step'       => 1,
             'default'    => 8,
-            'class'      => 'new',
+            'class'      => '',
             'dependency' => array( 'customize_card', '==', true )
         ),
 		array(
@@ -1063,7 +1035,7 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('tab(选项卡)模式','io_setting'),
             'label'   => __('首页使用标签模式展示2级收藏网址','io_setting'),
-            'default' => false,
+            'default' => true,
         ),
         array(
             'id'      => 'tab_ajax',
@@ -1080,44 +1052,121 @@ CSF::createSection( $prefix, array(
             'label'   => __('网址块分类名前面显示父级分类名称','io_setting'),
             'default' => false,
         ),
+    )
+));
+//
+// 统计浏览
+//
+CSF::createSection( $prefix, array(
+    'title'    => __('统计浏览','io_setting'),
+    'icon'     => 'fa fa-eye',
+    'fields'   => array(  
         array(
-            'id'      => 'show_friendlink',
+            'id'      => 'post_views',
             'type'    => 'switcher',
-            'title'   => __('启用友链','io_setting'),
-            'label'   => __('启用自定义文章类型“链接(友情链接)”，启用后需刷新页面','io_setting'),
-            'default' => false,
+            'title'   => __('访问统计','io_setting'),
+            'label'   => __('启用前先禁用WP-PostViews插件，因为功能重叠','io_setting'),
+            'default' => true,
         ),
         array(
-            'id'         => 'links',
-            'type'       => 'switcher',
-            'title'      => ' ┗━━ '.__('友情链接','io_setting'),
-            'label'      => __('在首页底部添加友情链接','io_setting'),
-            'default'    => true,
-            'dependency' => array( 'show_friendlink', '==', true )
+            'type'    => 'notice',
+            'style'   => 'danger',
+            'content' => '注意：关闭“访问统计”后，以下功能会受影响！',
+            'dependency' => array( 'post_views', '==', false )
         ),
         array(
-            'id'          => 'home_links',
-            'type'        => 'checkbox',
-            'title'       => ' ┗━━ '.__('首页显示分类','io_setting'),
-            'after'       => __('不选则全部显示。','io_setting'),
-            'inline'      => true,
-            'options'     => 'categories',
-            'query_args'  => array(
-              'taxonomy'  => 'link_category',
+            'id'      => 'views_n',
+            'type'    => 'text',
+            'title'   => ' ┗━━ '.__('访问基数','io_setting'),
+            'after'   => '<br>'.__('随机访问基数，取值范围：(0~10)*访问基数<br>设置大于0的整数启用，会导致访问统计虚假，酌情开启，关闭请填0','io_setting'),
+            'default' => 0,
+            'dependency' => array( 'post_views', '==', true )
+        ),
+        array(
+            'id'      => 'views_r',
+            'type'    => 'text',
+            'title'   => ' ┗━━ '.__('访问随机计数','io_setting'),
+            'after'   => '<br>'.__('访问一次随机增加访问次数，比如访问一次，增加5次<br>取值范围：(1~10)*访问随机数<br>设置大于0的数字启用，可以是小数，如：0.5，但小于0.5会导致取0值<br>会导致访问统计虚假，酌情开启，关闭请填0','io_setting'),
+            'default' => 0,
+            'dependency' => array( 'post_views', '==', true )
+        ),
+        array(
+            'id'      => 'like_n',
+            'type'    => 'text',
+            'title'   => __('点赞基数','io_setting'),
+            'after'   => '<br>'.__('随机点赞基数，取值范围：(0~10)*点赞基数<br>设置大于0的整数启用，会导致点赞统计虚假，酌情开启，关闭请填0','io_setting'),
+            'default' => 0,
+            'dependency' => array( 'user_center', '==', false,'all' )
+        ),
+        array(
+            'id'      => 'leader_board',
+            'type'    => 'switcher',
+            'title'   => __('按天记录统计数据','io_setting'),
+            'label'   => 'BETA',
+            'class'   => 'new',
+            'default' => true,
+        ),
+        array(
+            'id'      => 'details_chart',
+            'type'    => 'switcher',
+            'title'   => ' ┗━━ '.__('详情页显示统计图表','io_setting'),
+            'label'   => 'BETA',
+            'class'   => 'new',
+            'default' => true,
+        ),
+        array(
+            'id'         => 'how_long',
+            'type'       => 'spinner',
+            'title'      => ' ┗━━ '.__('统计数据保留天数','io_setting'),
+            'after'      => __('最少30天','io_setting'),
+            'unit'       => '天',
+            'step'       => 1,
+            'default'    => 30,
+            'dependency' => array( 'leader_board', '==', true )
+        ),
+        array(
+            'id'        => 'views_options',
+            'type'      => 'fieldset',
+            'title'     => __('浏览计数设置','io_setting'),
+            'fields'    => array(
+                array(
+                    'id'          => 'count',
+                    'type'        => 'select',
+                    'title'       => __( '计数来源', 'io_setting' ),
+                    'options'     => array(
+                        '0'  => __( '所有人', 'io_setting' ),
+                        '1'  => __( '只有访客', 'io_setting' ),
+                        '2'  => __( '只有注册用户', 'io_setting' ),
+                    ),
+                ),
+                array(
+                    'id'      => 'exclude_bots',
+                    'type'    => 'switcher',
+                    'title'   => __('排除机器人(爬虫等)','io_setting'),
+                ),
+                array(
+                    'id'          => 'template',
+                    'type'        => 'select',
+                    'title'       => __( '显示模板', 'io_setting' ),
+                    'options'     => array(
+                        '0'  => __( '正常显示计数', 'io_setting' ),
+                        '1'  => __( '以千单位显示', 'io_setting' ),
+                    ),
+                ),
+                array(
+                    'id'      => 'use_ajax',
+                    'type'    => 'switcher',
+                    'title'   => __('使用Ajax更新浏览次数','io_setting'),
+                    'class'   => $views_use_ajax,
+                    'label'      => '如果启用了静态缓存，将使用AJAX更新浏览计数，且“随机计数”失效。',
+                ),
             ),
-            'dependency'  => array( 'show_friendlink|links', '==|==', 'true|true' )
-        ),
-        array(
-            'id'          => 'links_pages',
-            'type'        => 'select',
-            'title'       => ' ┗━━ '.__('友情链接归档页','io_setting'),
-            'after'       => __(' 如果没有，新建页面，选择“友情链接”模板并保存。','io_setting'),
-            'options'     => 'pages',
-            'query_args'  => array(
-              'posts_per_page'  => -1,
+            'default'        => array(
+                'count'         => '0',
+                'exclude_bots'  => true,
+                'template'      => '0',
+                'use_ajax'      => true,
             ),
-            'placeholder' => __('选择友情链接归档页面', 'io_setting'),
-            'dependency'  => array( 'show_friendlink|links', '==|==', 'true|true' )
         ),
     )
 ));
@@ -1186,8 +1235,8 @@ CSF::createSection( $prefix, array(
             'type'      => 'image_select',
             'title'     => __('文章卡片样式','io_setting'),
             'options'   => array(
-                'card'    => get_theme_file_uri('/images/op-app-c-card.jpg'),
-                'default' => get_theme_file_uri('/images/op-app-c-def.jpg'),
+                'card'    => get_theme_file_uri('/images/op-app-c-card.png'),
+                'default' => get_theme_file_uri('/images/op-post-c-def.png'),
             ),
             'default'   => 'default',
         ),
@@ -1206,12 +1255,20 @@ CSF::createSection( $prefix, array(
             'type'      => 'image_select',
             'title'     => __('网址卡片样式','io_setting'),
             'options'   => array(
-              'max'     => get_theme_file_uri('/images/op-site-c-max.jpg'),
-              'default' => get_theme_file_uri('/images/op-site-c-def.jpg'),
-              'min'     => get_theme_file_uri('/images/op-site-c-min.jpg'),
+              'max'     => get_theme_file_uri('/images/op-site-c-max.png'),
+              'default' => get_theme_file_uri('/images/op-site-c-def.png'),
+              'min'     => get_theme_file_uri('/images/op-site-c-min.png'),
             ),
             'default'   => 'default',
 			'after'   => __('选择首页网址块显示风格：大、中、小','io_setting'),
+        ),
+        array(
+            'id'        => 'url_reverse',
+            'type'      => 'switcher',
+            'title'     => __('“直达”和“详情页” url 颠倒','io_setting'),
+            'class'     => 'new',
+			'label'     => __('需先开启“网址详情页”','io_setting'),
+            'dependency'  => array( 'details_page', '==', true, 'all', 'visible' ),
         ),
         array(
             'id'        => 'site_archive_n',
@@ -1241,8 +1298,8 @@ CSF::createSection( $prefix, array(
             'type'      => 'image_select',
             'title'     => __('app 卡片样式','io_setting'),
             'options'   => array(
-              'card'    => get_theme_file_uri('/images/op-app-c-card.jpg'),
-              'default' => get_theme_file_uri('/images/op-app-c-def.jpg'),
+              'card'    => get_theme_file_uri('/images/op-app-c-card.png'),
+              'default' => get_theme_file_uri('/images/op-app-c-def.png'),
             ),
             'default'   => 'default',
 			'after'   => __('选择首页app块显示风格','io_setting')
@@ -1256,14 +1313,11 @@ CSF::createSection( $prefix, array(
         ),
         //array(
         //    'id'        => 'default_app_screen',
-        //    'type'      => 'media',
+        //    'type'      => 'upload',
         //    'title'     => __('app 默认截图','io_setting'),
         //    'add_title' => __('添加','io_setting'),
         //    'after'     => __('app截图为空时显示这项设置的内容','io_setting'),
-        //    'default'   => array(
-        //        'url'       => get_theme_file_uri('/screenshot.jpg'),
-        //        'thumbnail' => get_theme_file_uri('/screenshot.jpg'),
-        //    ),
+        //    'default'   => get_theme_file_uri('/screenshot.jpg'),
         //),
     )
 ));
@@ -1281,6 +1335,36 @@ CSF::createSection( $prefix, array(
             'title'     => __('书籍分类页显示数量','io_setting'),
             'default'   => 20,
             'after'     => '填写需要显示的数量。<br>填写 0 为根据<a href="'.home_url().'/wp-admin/options-reading.php">系统设置数量显示</a>',
+        ),
+        array(
+            'id'            => 'books_metadata',
+            'type'          => 'group',
+            'title'         => '书籍&影视元数据默认值',
+            'fields'        => array(
+                array(
+                    'id'    => 'term',
+                    'type'  => 'text',
+                    'title' => '项目(控制在5个字内)',
+                ),
+                array(
+                    'id'          => 'detail',
+                    'type'        => 'text',
+                    'title'       => '内容',
+                    'placeholder' => __('如留空，请删除此项','io_setting'),
+                ),
+            ),
+            'default' => array(
+                array(
+                    'term'    => '作者',
+                ),
+                array(
+                    'term'    => '出版社',
+                ),
+                array(
+                    'term'    => '发行日期',
+                    'detail'  => date('Y-m'),
+                ),
+            ),
         ),
     )
 ));
@@ -1305,7 +1389,7 @@ CSF::createSection( $prefix, array(
             'title'  => __('公安备案号','io_setting'), 
             'subtitle'   => __('此选项“自定义页脚版权”非空则禁用','io_setting'),
             'dependency'  => array( 'footer_copyright', '==', '', '', 'visible' ),
-            'class'     => 'new'
+            'class'     => ''
         ),
 
         array(
@@ -1361,14 +1445,11 @@ CSF::createSection( $prefix, array(
         ),
         array(
             'id'        => 'og_img',
-            'type'      => 'media',
+            'type'      => 'upload',
             'title'     => __('og 标签默认图片','io_setting'),
             'add_title' => __('上传','io_setting'),
             'after'     => __('QQ、微信分享时显示的缩略图<br>主题会默认获取文章、网址等内容的图片，但是如果内容没有图片，则获取此设置','io_setting'),
-            'default'   => array(
-                'url'       => get_theme_file_uri('/screenshot.jpg'),
-                'thumbnail' => get_theme_file_uri('/screenshot.jpg'),
-            ),
+            'default'   => get_theme_file_uri('/screenshot.jpg'),
         ),
         array(
             'id'        => 'baidu_submit',
@@ -1424,7 +1505,7 @@ CSF::createSection( $prefix, array(
             'type'        => 'switcher',
             'title'       => __('网址详情页默认内容开关','io_setting'),
             'desc'        => __('内容可在主题文件夹里的 templates\content-site.php 底部修改','io_setting'),
-            'class'       => 'new',
+            'class'       => '',
         ),
         array(
             'id'        => 'tag_c',
@@ -1602,16 +1683,18 @@ CSF::createSection( $prefix, array(
         array(
             'id'         => 'is_iconfont',
             'type'       => 'switcher',
-            'title'      => __('阿里图标', 'io_setting'),
+            'title'      => __('字体图标源', 'io_setting'),
             'label'      => __('fa 和阿里图标二选一，为轻量化资源，不能共用。', 'io_setting'),
+            'after'      => '<a href="https://www.iotheme.cn/onenavzhuticaidantubiaoshezhi.html" target="_blank">教程--></a>',
+            'text_on'    => '阿里图标',
+            'text_off'   => 'fa图标',
+            'text_width' => 100,
             'default'    => false,
         ),
         array(
-            'id'         => 'fa_cdn',
-            'type'       => 'switcher',
-            'title'      => ' ┗━━ '.__('fontawesome CDN', 'io_setting'),
-            'label'      => __('fa图标库使用CDN，cdn地址修改请在 inc\register.php 文件里修改。默认 CDN 由 www.jsdelivr.com 提供', 'io_setting'),
-            'default'    => false,
+            'type'       => 'notice',
+            'style'      => 'success',
+            'content'    => __('fa图标库使用CDN，cdn地址修改请在 inc\theme-start.php 文件里修改。默认 CDN 由 www.jsdelivr.com 提供', 'io_setting'),
             'dependency' => array( 'is_iconfont', '==', false )
         ),
         array(
@@ -1654,7 +1737,7 @@ CSF::createSection( $prefix, array(
         array(
             'type'    => 'submessage',
             'style'   => 'danger',
-            'content' => __('邮件发信服务设置，如果你不需要评论邮件通知等功能，可不设置。<p>国内一般使用 SMTP 服务，<a href="https://www.iowen.cn/wordpress-mail-smtp-code/" target="_blank">设置方法</a></p>','io_setting'),
+            'content' => __('邮件发信服务设置，如果你不需要评论邮件通知等功能，可不设置。<p>国内一般使用 SMTP 服务</p>如果要关闭请选择‘PHP’','io_setting'),
         ),
         
 		array(
@@ -1664,9 +1747,9 @@ CSF::createSection( $prefix, array(
 			'default' => 'php',
             'inline'  => true,
 			'options' => array(
-        		'php'   => 'PHP',
-        		'smtp'  => 'SMTP'
-        	),
+                'php'   => 'PHP',
+                'smtp'  => 'SMTP'
+            ),
 			'after'    => __('使用SMTP或PHPMail作为默认邮件发送方式','io_setting'),
 		),
 		array(
@@ -1692,10 +1775,10 @@ CSF::createSection( $prefix, array(
 			'default'  => 'ssl',
             'inline'   => true,
 			'options'  => array(
-        		'auto'   => 'Auto',
-        		'ssl'    => 'SSL',
-        		'tls'    => 'TLS',
-        		'none'   => 'None'
+                'auto'   => 'Auto',
+                'ssl'    => 'SSL',
+                'tls'    => 'TLS',
+                'none'   => 'None'
 			),
 			'dependency'   => array( 'i_default_mailer', '==', 'smtp' )
 		), 
@@ -1784,8 +1867,8 @@ CSF::createSection( $prefix, array(
             'type'       => 'textarea',
             'title'      => __('博客随机头部图片','io_setting'),
             'subtitle'   => __('缩略图、文章页随机图片','io_setting'),
-            'after'      => __('一行一个图片地址，注意不要有空格<br>默认内容：','io_setting').'<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/1.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/2.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/3.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/4.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/5.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/6.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/7.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/8.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/9.jpg<br>https://gitee.com/iowen/ioimg/raw/master/screenshots/0.jpg',
-            'default'    => 'https://gitee.com/iowen/ioimg/raw/master/screenshots/1.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/2.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/3.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/4.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/5.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/6.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/7.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/8.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/9.jpg'.PHP_EOL.'https://gitee.com/iowen/ioimg/raw/master/screenshots/0.jpg',
+            'after'      => __('一行一个图片地址，注意不要有空格<br>默认内容：','io_setting').'<br>//gitee.com/iowen/ioimg/raw/master/screenshots/1.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/2.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/3.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/4.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/5.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/6.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/7.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/8.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/9.jpg<br>//gitee.com/iowen/ioimg/raw/master/screenshots/0.jpg',
+            'default'    => '//gitee.com/iowen/ioimg/raw/master/screenshots/1.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/2.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/3.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/4.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/5.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/6.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/7.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/8.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/9.jpg'.PHP_EOL.'//gitee.com/iowen/ioimg/raw/master/screenshots/0.jpg',
         ),
     )
 ));
@@ -1871,7 +1954,7 @@ CSF::createSection( $prefix, array(
             'id'    => 'enable_popup',
             'type'  => 'switcher',
             'title' => __('启用弹窗','io_setting'),
-            'class'     => 'new',
+            'class'     => '',
         ),
         array(
             'id'        => 'popup_set',
@@ -1929,7 +2012,7 @@ CSF::createSection( $prefix, array(
                     'id'      => 'width',
                     'type'    => 'slider',
                     'title'   => '宽度',
-                    'class'   => 'new',
+                    'class'   => '',
                     'min'     => 340,
                     'max'     => 1024,
                     'step'    => 10,
@@ -1976,6 +2059,35 @@ CSF::createSection( $prefix, array(
             ),
             'dependency'  => array( 'enable_popup', '==', 'true', '', 'visible' ),
         ),
+        array(
+            'id'        => 'carousel_img',
+            'type'      => 'repeater',
+            'title'     => '首页&博客轮播模块',
+            'fields'    => array(
+                array(
+                    'id'        => 'title',
+                    'type'      => 'text',
+                    'title'     => '标题',
+                ),
+                array(
+                    'id'      => 'img',
+                    'type'    => 'upload',
+                    'title'   => __('图片','io_setting'),
+                    'library' => 'image',
+                ),
+                array(
+                    'id'        => 'url',
+                    'type'      => 'text',
+                    'title'     => '目标URL',
+                ),
+                array(
+                    'id'      => 'is_ad',
+                    'type'    => 'switcher',
+                    'title'   => '是广告',
+                    'label'   => __('注意：广告将直达目标URL,不会添加跳转和nofollow','io_setting'),
+                ),
+            )
+        ),
         //TODO 待加轮播
     )
 ));
@@ -1992,6 +2104,12 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('首页顶部广告位','io_setting'),
             'default' => false,
+        ),
+        array(
+            'type'    => 'submessage',
+            'style'   => 'danger',
+            'content' => '<b>注意：</b>需关掉‘big搜索’才能显示“首页顶部广告位”内容',
+			'dependency' => array( 'search_big|ad_home_s', '==|==', 'true|true', 'all' )
         ),
         array(
             'id'      => 'ad_home_mobile',
@@ -2312,6 +2430,9 @@ CSF::createSection( $prefix, array(
 			'type'    => 'switcher',
 			'title'   => __('禁用REST API','io_setting'),
 			'label'   => __('禁用REST API、移除wp-json链接（默认关闭，如果你的网站没有做小程序或是APP，建议禁用REST API）','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
 			'default' => false
 		),
  
@@ -2320,7 +2441,10 @@ CSF::createSection( $prefix, array(
             'id'      => 'diable_revision',
             'type'    => 'switcher',
             'title'   => __('禁用文章修订功能','io_setting'),
-            'label'   => __('禁用文章修订功能，精简 Posts 表数据。','io_setting'),
+            'label'   => __('禁用文章修订功能，精简 Posts 表数据。(如果古滕堡报错，请关闭该选项)','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => false
         ),
  
@@ -2330,6 +2454,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用字符转码','io_setting'),
             'label'   => __('禁用字符换成格式化的 HTML 实体功能。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => true
         ),
 
@@ -2338,6 +2465,9 @@ CSF::createSection( $prefix, array(
 			'type'    => 'switcher',
 			'title'   => __('禁用站点Feed','io_setting'),
 			'label'   => __('禁用站点Feed，防止文章快速被采集。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
 			'default' => true
 		),
 
@@ -2346,6 +2476,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用Trackbacks','io_setting'),
             'label'   => __('Trackbacks协议被滥用，会给博客产生大量垃圾留言，建议彻底关闭Trackbacks。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => true
         ),
 
@@ -2354,6 +2487,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用古腾堡编辑器','io_setting'),
             'label'   => __('禁用Gutenberg编辑器，换回经典编辑器。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => true
         ),
 
@@ -2362,6 +2498,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => ' ┗━━ '.__('禁用XML-RPC','io_setting'),
             'label'   => __('XML-RPC协议用于客户端发布文章，如果你只是在后台发布，可以关闭XML-RPC功能。Gutenberg编辑器需要XML-RPC功能。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => false,
 			'dependency' => array( 'disable_gutenberg', '==', true )
         ),
@@ -2371,6 +2510,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用后台隐私（GDPR）','io_setting'),
             'label'   => __('GDPR（General Data Protection Regulation）是欧洲的通用数据保护条例，WordPress为了适应该法律，在后台设置很多隐私功能，如果只是在国内运营博客，可以移除后台隐私相关的页面。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => false
         ),
         array(
@@ -2378,6 +2520,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用emoji代码','io_setting'),
             'label'   => __('WordPress 为了兼容在一些比较老旧的浏览器能够显示 Emoji 表情图标，而准备的功能。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => true
         ),
         array(
@@ -2385,6 +2530,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用Auto Embeds','io_setting'),
             'label'   => __('禁用 Auto Embeds 功能，加快页面解析速度。 Auto Embeds 支持的网站大部分都是国外的网站，建议禁用。','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => true
         ),
         array(
@@ -2392,6 +2540,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用文章Embed','io_setting'),
             'label'   => __('禁用可嵌入其他 WordPress 文章的Embed功能','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => false
         ),
         array(
@@ -2399,6 +2550,9 @@ CSF::createSection( $prefix, array(
             'type'    => 'switcher',
             'title'   => __('禁用s.w.org','io_setting'),
             'label'   => __('移除 WordPress 头部加载 DNS 预获取（s.w.org 国内根本无法访问）','io_setting'),
+            'text_on' => '已禁用',
+            'text_off'=> '未禁用',
+            'text_width' => 80,
             'default' => false
         ),
     )
@@ -2524,6 +2678,13 @@ CSF::createSection( $prefix, array(
                 'admin_email'    => get_option( 'admin_email' ),
             ),
         ),
+		array(
+			'id'      => 'reg_verification',
+			'type'    => 'switcher',
+			'title'   => __('注册时验证邮箱','io_setting'),
+			'label'   => __('发送邮箱验证码，请先在“其他功能”中配置好邮件发信服务。','io_setting'),
+			'default' => false
+		),
         array(
             'id'        => 'io_comment_set',
             'type'      => 'fieldset',
@@ -2550,6 +2711,7 @@ CSF::createSection( $prefix, array(
             'type'      => 'fieldset',
             'title'     => '腾讯防水墙',
             'subtitle'  => '<span style="color:#f00">开启后，请认真填写，填错会造成无法登陆后台</span>',
+            'before'    => '如果开启的防水墙后进不了后台，请将主题文件‘functions.php’里“LOGIN_007”的 true 改为 false 。',
             'fields'    => array(
 				array(
 					'id'    	=> 'tcaptcha_007',
@@ -2675,11 +2837,112 @@ CSF::createSection( $prefix, array(
             'type'       => 'text',
             'title'      => __('登录后返回地址', 'io_setting'),
             'desc'       => '登录后返回的地址，一般是首页或者个人中心页',
-			'default'    => home_url(),
+			'default'    => esc_url(home_url()),
         ),
     )
 ));
 
+//
+// 今日热点
+//
+CSF::createSection( $prefix, array(
+    'title'        => __('今日热点','io_setting'),
+    'icon'         => 'fab fa-hotjar new',
+    'fields'       => array(
+        array(
+            'id'      => 'iowen_key',
+            'type'    => 'text',
+            'title'   => __('一为 API 在线服务激活码','io_setting'),
+            'after'   => '<br>'.__('留空不影响主题使用，如需要以下服务必须填。<br>此 key 用于<br>1、热搜榜、新闻源等卡片数据获取<br>','io_setting').'<br>iowen 在线服务为订阅服务，购买主题免费赠送一年，请先使用订单激活码<a href="//www.iotheme.cn/user?try=reg" target="_blank" title="注册域名">注册域名</a>。 如果没有购买或者过期，请访问<a href="//www.iotheme.cn/store/iowenapi.html" target="_blank" title="购买服务">iTheme</a>购买。',
+        ),
+        array(
+            'id'        => 'hot_new',
+            'type'      => 'group',
+            'title'     => '新闻热搜',
+            'fields'    => array(
+                array(
+                    'id'        => 'name',
+                    'type'      => 'text',
+                    'title'     => '名称',
+                    'class'     => 'disabled',
+                    'subtitle'  => '只读',
+                ),
+                array(
+                    'id'           => 'hot_type',
+                    'type'         => 'button_set',
+                    'title'        => __('类型','io_setting'),
+                    'class'        => 'disabled',
+                    'options'      => array(
+                        'api'   => 'API',
+                        'rss'   => 'RSS',
+                    ),
+                    'default'      => 'api',
+                ),
+                array(
+                    'id'        => 'description',
+                    'type'      => 'text',
+                    'title'     => '描述',
+                    'class'     => 'disabled',
+                    'subtitle'  => '只读',
+                ),
+                array(
+                    'id'        => 'rule_id',
+                    'type'      => 'text',
+                    'class'     => 'disabled',
+                    'title'     => 'ID',
+                    'subtitle'  => '只读',
+                ),
+                array(
+                    'id'        => 'type',
+                    'type'      => 'text',
+                    'class'     => 'disabled csf-depend-hidden csf-depend-on',
+                    'title'     => '显示模板',
+                    'subtitle'  => '只读',
+                ),
+                array(
+                    'id'      => 'is_iframe',
+                    'type'    => 'checkbox',
+                    'title'   => 'iframe 加载',
+                    'label'   => '在页面内以 iframe 加载，如果目标站不支持，请关闭',
+                    'default' => false
+                ),
+                array(
+                    'id'      => 'ico',
+                    'type'    => 'upload',
+                    'title'   => __('LOGO，标志','io_setting'),
+                    'library' => 'image',
+                    'after'   => __('建议 30x30 ，留空则不显示。','io_setting'),
+                    'default' => get_theme_file_uri('/images/hot_ico.png'),
+                ),
+                array(
+                    'type'    => 'content',
+                    'content' => '<div style="text-align:center;"><a id="hot-option" href="javascript:" class="button button-primary" data-id="hot_new" data-user="'.io_get_option('iowen_key').'"> 配 置 </a></div>',
+                    'dependency' => array( 'rule_id', '==', '' )
+                ),
+                array(
+                    'type'    => 'content',
+                    'content' => '<div style="text-align:center;"><a id="hot-modify" href="javascript:" class="button button-primary" data-id="hot_new" data-user="'.io_get_option('iowen_key').'"> 修 改 </a></div>',
+                    'dependency' => array( 'rule_id', '!=', '' )
+                ),
+            )
+        ),
+        array(
+            'id'         => 'hot_iframe',
+            'type'       => 'switcher',
+            'title'      => __('热点 iframe 加载总开关','io_setting'),
+            'label'      => __('如果开启了此选项链接还是在新窗口打开，说明对方不支持 iframe 嵌套','io_setting'),
+            'default'    => false,
+        ),
+        array(
+            'type'    => 'notice',
+            'style'   => 'success',
+            'content' => '<p>自定义规则教程：</p>
+            <ul style="list-style:decimal;padding-left:15px">
+                <li><a href="https://www.iotheme.cn/io-api-user-manual.html"  target="_blank">api 使用手册</a></li>
+            </ul>',
+        ),
+    )
+));
 
 //
 // 备份
