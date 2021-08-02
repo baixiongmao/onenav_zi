@@ -1,0 +1,50 @@
+    # 自动部署的名称
+name: Publish And Deploy Demo
+    # 监听push只有是提交tag才会部署
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+    # 打包及发布
+  build-and-deploy:
+    # 运行环境
+    runs-on: ubuntu-latest
+    steps: # 步骤
+
+    # 下载源码
+    - name: Checkout
+      uses: actions/checkout@master
+
+    # 打包构建
+    - name: Build
+      uses: actions/setup-node@master
+    - run: npm install
+    - run: npm run build
+    # 将.nuxt static nuxt.config.js package.json package-lock.json pm2.config.json文件打包压缩为release.tgz
+    - run: zip -r onnav_zi.zip / -x='img/*'
+
+    # 发布 Release
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }} # 在github setting中的secrets中配置的TOKEN => github access token
+      with:
+        tag_name: ${{ github.ref }} # 标签名称
+        release_name: Release ${{ github.ref }} # release名称
+        draft: false # 是否是草稿
+        prerelease: false # 是否是预发布
+
+    # 上传构建结果到 Release（将打包的压缩包release.tgz上传到release）
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # 上传地址
+        asset_path: ./onnav_zi.zip
+        asset_name: onnav_zi.zip
+        asset_content_type: application/zip
