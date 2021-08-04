@@ -13,7 +13,7 @@
    添加代码-->添加顶部代码
    ```
 
-   代码
+   调用代码
 
    ```php
    <?php echo io_get_option('header_html');?>
